@@ -1,109 +1,117 @@
-# 🌱 PlantUML
+Clone of [PlantUML](https://github.com/plantuml/plantuml) (v1.2025.9) with a custom UML type classification tool.
 
-Generate UML diagrams from textual descriptions.
+# UmlDiagramClassifier
 
-[![Discord server](https://img.shields.io/discord/1083727021328306236?color=5865F2&logo=discord&logoColor=white)](https://discord.gg/sXhzexAQGh)
-[![GitHub Sponsors](https://img.shields.io/github/sponsors/plantuml?logo=github)](https://github.com/sponsors/plantuml/)
-[![GitHub Org's stars](https://img.shields.io/github/stars/plantuml)](https://github.com/plantuml/plantuml/stargazers/)
-[![GitHub watchers](https://img.shields.io/github/watchers/plantuml/plantuml)](https://github.com/plantuml/plantuml/watchers/)
-[![GitHub contributors](https://img.shields.io/github/contributors-anon/plantuml/plantuml?color=blue)](https://github.com/plantuml/plantuml/graphs/contributors)
-[![GitHub forks](https://img.shields.io/github/forks/plantuml/plantuml)](https://github.com/plantuml/plantuml/network/)
-[![GitHub all releases](https://img.shields.io/sourceforge/dt/plantuml?color=blue)](https://github.com/plantuml/plantuml/releases)
+A tool for classifying PlantUML diagram files into one of nine standard UML diagram types. It reuses PlantUML's own internal parser to achieve compiler-grade accuracy, with no modifications to PlantUML's source code.
 
-[![Release (latest by date)](https://img.shields.io/github/v/release/plantuml/plantuml)](https://github.com/plantuml/plantuml/releases/latest)
-[![Release Date](https://img.shields.io/github/release-date/plantuml/plantuml?color=blue)](https://github.com/plantuml/plantuml/releases/latest)
-[![GitHub commits since latest release (by date)](https://img.shields.io/github/commits-since/plantuml/plantuml/latest)](https://github.com/plantuml/plantuml/commits/)
-[![javadoc](https://javadoc.io/badge2/net.sourceforge.plantuml/plantuml-gplv2/javadoc.svg)](https://javadoc.io/doc/net.sourceforge.plantuml/plantuml-gplv2)
+## Classification Method
 
-[![Pre-release (latest by date)](https://img.shields.io/github/v/release/plantuml/plantuml?color=chocolate&include_prereleases)](https://github.com/plantuml/plantuml/releases/tag/snapshot)
-[![Pre-release Date](https://img.shields.io/github/release-date-pre/plantuml/plantuml?color=chocolate)](https://github.com/plantuml/plantuml/releases/tag/snapshot)
-[![GitHub last commit](https://img.shields.io/github/last-commit/plantuml/plantuml?color=chocolate)](https://github.com/plantuml/plantuml/commits/)
-[![CI](https://github.com/plantuml/plantuml/actions/workflows/ci.yml/badge.svg?color=chocolate)](https://github.com/plantuml/plantuml/actions/workflows/ci.yml)
-[![snapshot javadoc](https://img.shields.io/badge/javadoc-snapshot-chocolate.svg?logo=github)](https://plantuml.github.io/plantuml/javadoc)
-[![snapshot jacoco](https://img.shields.io/badge/code_coverage%3A_jacoco-snapshot-chocolate?logo=github)](https://plantuml.github.io/plantuml/jacoco)
+The classifier feeds each `.puml` file through PlantUML's parser (`SourceStringReader`) and inspects the resulting internal diagram object. Classification is performed in two stages.
 
-## ℹ️ About
+### Stage 1: Diagram class dispatch
 
-PlantUML is a component that allows you to create various UML diagrams through simple textual descriptions. From sequence diagrams to deployment diagrams and beyond, PlantUML provides an easy way to create visual representations of complex systems.
+PlantUML parses each diagram into a specific Java class. Five of nine types map directly to a unique class or `UmlDiagramType` value and are classified deterministically:
 
-### 🗃️ Supported Diagram Types
+| Diagram Type | Internal Class | `UmlDiagramType` |
+|---|---|---|
+| sequence | `SequenceDiagram` | `SEQUENCE` |
+| activity | `ActivityDiagram3` | `ACTIVITY` |
+| state | `StateDiagram` (via `CucaDiagram`) | `STATE` |
+| timing | `TimingDiagram` | `TIMING` |
 
-- 🧩 UML Diagrams
-  - [Sequence diagram](http://plantuml.com/sequence-diagram)
-  - [Use case diagram](http://plantuml.com/use-case-diagram)
-  - [Class diagram](http://plantuml.com/class-diagram)
-  - [Object diagram](http://plantuml.com/object-diagram)
-  - [Activity diagram](http://plantuml.com/activity-diagram-beta)
-    - [Legacy syntax](http://plantuml.com/activity-diagram-legacy)
-  - [Component diagram](http://plantuml.com/component-diagram)
-  - [Deployment diagram](http://plantuml.com/deployment-diagram)
-  - [State diagram](http://plantuml.com/state-diagram)
-  - [Timing diagram](http://plantuml.com/timing-diagram)
-- 📈 Non-UML Diagrams
-  - [JSON data](http://plantuml.com/json)
-  - [YAML data](http://plantuml.com/yaml)
-  - [EBNF (Extended Backus-Naur Form)](http://plantuml.com/ebnf)
-  - [Regex (Regular Expression)](http://plantuml.com/regex)
-  - [Network diagram (nwdiag)](http://plantuml.com/nwdiag)
-  - [Salt (Wireframe graphical interface or UI Mockups)](http://plantuml.com/salt)
-  - [Archimate diagram](http://plantuml.com/archimate-diagram)
-  - [SDL (Specification and Description Language)](http://plantuml.com/activity-diagram-beta#sdl)
-  - [Ditaa diagram](http://plantuml.com/ditaa)
-  - [Gantt diagram](http://plantuml.com/gantt-diagram)
-  - [Chronology diagram](http://plantuml.com/chronology-diagram)
-  - [MindMap diagram](http://plantuml.com/mindmap-diagram)
-  - [WBS (Work Breakdown Structure)](http://plantuml.com/wbs-diagram)
-  - [Mathematical Notations (AsciiMath, JLaTeXMath)](http://plantuml.com/ascii-math)
-  - Entity Relationship (ER) diagram
-    - [Information Engineering (IE) diagram](http://plantuml.com/ie-diagram)
-    - [Entity Relationship (ER) diagram (Chen's notation)](http://plantuml.com/er-diagram)
+### Stage 2: Heuristic disambiguation
 
-### 📣 Additional Features
+The remaining types share internal representations and require entity-level inspection.
 
-- [Hyperlinks and tooltips](http://plantuml.com/link)
-- [Rich text (Creole) with emoticons, unicode, and icons](http://plantuml.com/creole)
-- [OpenIconic icons](http://plantuml.com/openiconic)
-- [Sprite icons](http://plantuml.com/sprite)
+#### Class vs Object (`UmlDiagramType.CLASS`)
 
-### 📖 Learn More
+PlantUML uses the same `ClassDiagram` class for both class and object diagrams. The classifier iterates over all leaf entities and checks their `LeafType`:
 
-For a more detailed overview, visit [PlantUML Official Website](https://plantuml.com/).
+- If all entities are `LeafType.OBJECT` or `LeafType.MAP` (and none are class-like) → **object**
+- Otherwise → **class**
 
-## 🛡 Security
+Class-like types include: `CLASS`, `ABSTRACT_CLASS`, `INTERFACE`, `ENUM`, `ANNOTATION`, `ENTITY`, `PROTOCOL`, `STRUCT`, `EXCEPTION`, `METACLASS`, `STEREOTYPE`, `DATACLASS`, `RECORD`.
 
-See [Security Policy](SECURITY.md) and [Security overview](https://github.com/plantuml/plantuml/security).
+#### Component vs Deployment vs Use Case (`UmlDiagramType.DESCRIPTION`)
 
-> [!IMPORTANT]
-> [PlantUML is **not** affected by the log4j vulnerability.](https://github.com/plantuml/plantuml/issues/826)
+PlantUML uses the same `DescriptionDiagram` class for component, deployment, and use case diagrams. The classifier iterates over all leaf entities and checks both their `LeafType` and `USymbol`:
 
-## 🚀 Getting Started
+**Use case** is detected when:
+- Any entity has `LeafType.USECASE` or `LeafType.USECASE_BUSINESS`, or
+- Only actor symbols are present (no component or deployment symbols)
 
-Whether you're looking to use PlantUML as a standalone application or as a component in your own project, getting started is simple. Check out the official [PlantUML setup guide](https://plantuml.com/starting) for instructions on how to set up PlantUML on your system.
+**Deployment** is detected when deployment-specific symbols are present:
+- `NODE`, `CLOUD`, `DATABASE`, `ARTIFACT`, `STORAGE`, `FOLDER`, `FRAME`
 
-## ⚙️ Building from Source
+**Component** is detected when component-specific symbols are present:
+- `COMPONENT1`, `COMPONENT2`, `COMPONENT_RECTANGLE`
 
-To build PlantUML from source, you'll need to have certain prerequisites installed and follow a series of steps outlined in our build guide. Find detailed instructions in our [BUILDING.md](https://github.com/plantuml/plantuml/blob/master/BUILDING.md) file.
+When both component and deployment symbols are present, the diagram is classified as **deployment** (since deployment diagrams commonly embed components). When no distinguishing symbols are found, the default is **component**.
 
-## 🧱 Contributing
+## Supported Diagram Types
 
-PlantUML is an open-source project, and we welcome contributions of all kinds. Whether you're helping us fix bugs, improve the docs, or spread the word, we appreciate your support. See our [contributing guide](CONTRIBUTING.md) for more information on how to get started.
+| Output Label | PlantUML Syntax | Classification |
+|---|---|---|
+| `sequence` | `Alice -> Bob: msg` | Deterministic |
+| `activity` | `start` / `:action;` / `if ... then` | Deterministic |
+| `state` | `[*] --> State` | Deterministic |
+| `timing` | `@starttiming` | Deterministic |
+| `class` | `class Foo` / `interface Bar` | Heuristic (entity types) |
+| `object` | `object foo` / `map m` | Heuristic (entity types) |
+| `usecase` | `usecase "Login"` / `actor User` | Heuristic (entity symbols) |
+| `component` | `component "Auth"` | Heuristic (entity symbols) |
+| `deployment` | `node "Server"` / `cloud "CDN"` | Heuristic (entity symbols) |
 
-For comprehensive and detailed documentation on using PlantUML, refer to the [official Javadoc, available here](https://plantuml.github.io/plantuml/javadoc). Please note that this documentation is a work in progress and may not be complete. 
+## Prerequisites
 
-## 🧑‍🤝‍🧑 Support and Community
+- Java 8 or later
 
-- [GitHub issues](https://github.com/plantuml/plantuml/issues/)
-- [Community Forum](https://forum.plantuml.net/)
+## Build
 
-## 📃 License
+```bash
+./gradlew build -x test -x javadoc
+```
 
-PlantUML is licensed under several licenses; you can choose the one that suits you best:
+This produces an executable JAR at `build/libs/plantuml-1.2025.9.jar`.
 
-- [GPL license](https://www.gnu.org/licenses/gpl-3.0.html)
-- [LGPL license](https://www.gnu.org/licenses/lgpl-3.0.html)
-- [Apache license](https://www.apache.org/licenses/LICENSE-2.0)
-- [Eclipse Public license](https://www.eclipse.org/legal/epl-2.0/)
-- [MIT license](https://opensource.org/licenses/MIT)
+## Usage
 
-For more information, please refer to the [PlantUML license FAQ](https://plantuml.com/en/faq#ddbc9d04378ee462) to help determine which license is appropriate for your use case.
+```bash
+# Single file
+java -cp build/libs/plantuml-1.2025.9.jar \
+  net.sourceforge.plantuml.classifier.UmlDiagramClassifier diagram.puml
 
+# Multiple files
+java -cp build/libs/plantuml-1.2025.9.jar \
+  net.sourceforge.plantuml.classifier.UmlDiagramClassifier file1.puml file2.puml
+
+# All PlantUML files in a directory
+java -cp build/libs/plantuml-1.2025.9.jar \
+  net.sourceforge.plantuml.classifier.UmlDiagramClassifier --dir /path/to/puml/files/
+```
+
+The `--dir` option processes all files with extensions `.puml`, `.plantuml`, `.pu`, `.wsd`, `.uml`, and `.iuml`.
+
+## Output Format
+
+One JSON object per diagram to standard output (JSON Lines format):
+
+```json
+{"file":"example.puml","diagram_type":"class","error":null}
+{"file":"sequence.puml","diagram_type":"sequence","error":null}
+{"file":"broken.puml","diagram_type":null,"error":"parse_error"}
+```
+
+| Field | Description |
+|---|---|
+| `file` | Input filename. Multi-diagram files receive a numeric suffix (e.g., `file.puml_1`). |
+| `diagram_type` | One of: `sequence`, `activity`, `state`, `timing`, `class`, `object`, `usecase`, `component`, `deployment`. Null on failure. |
+| `error` | Null on success. Descriptive string on failure (e.g., `parse_error`, `unsupported:MindMapDiagram`). |
+
+## Changes from Upstream PlantUML
+
+**1 new class** added: `net.sourceforge.plantuml.classifier.UmlDiagramClassifier` — the classification tool entry point. No modifications were made to any existing PlantUML source files.
+
+## License
+
+This clone retains PlantUML's original GNU General Public License v3 (GPL-3.0).
