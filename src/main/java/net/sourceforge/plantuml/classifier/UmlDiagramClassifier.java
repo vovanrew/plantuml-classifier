@@ -20,12 +20,12 @@ import net.sourceforge.plantuml.sequencediagram.SequenceDiagram;
 import net.sourceforge.plantuml.skin.UmlDiagramType;
 import net.sourceforge.plantuml.timingdiagram.TimingDiagram;
 
-public class DiagramClassifier {
+public class UmlDiagramClassifier {
 
 	public static void main(String[] args) {
 		if (args.length < 1) {
-			System.err.println("Usage: DiagramClassifier <file.puml> [file2.puml ...]");
-			System.err.println("       DiagramClassifier --dir <directory>");
+			System.err.println("Usage: UmlDiagramClassifier <file.puml> [file2.puml ...]");
+			System.err.println("       UmlDiagramClassifier --dir <directory>");
 			System.exit(1);
 		}
 

@@ -1,6 +1,6 @@
 Clone of [PlantUML](https://github.com/plantuml/plantuml) (v1.2025.9) with a custom UML type classification tool.
 
-# DiagramClassifier
+# UmlDiagramClassifier
 
 A tool for classifying PlantUML diagram files into one of nine standard UML diagram types. It reuses PlantUML's own internal parser to achieve compiler-grade accuracy, with no modifications to PlantUML's source code.
 
@@ -79,15 +79,15 @@ This produces an executable JAR at `build/libs/plantuml-1.2025.9.jar`.
 ```bash
 # Single file
 java -cp build/libs/plantuml-1.2025.9.jar \
-  net.sourceforge.plantuml.classifier.DiagramClassifier diagram.puml
+  net.sourceforge.plantuml.classifier.UmlDiagramClassifier diagram.puml
 
 # Multiple files
 java -cp build/libs/plantuml-1.2025.9.jar \
-  net.sourceforge.plantuml.classifier.DiagramClassifier file1.puml file2.puml
+  net.sourceforge.plantuml.classifier.UmlDiagramClassifier file1.puml file2.puml
 
 # All PlantUML files in a directory
 java -cp build/libs/plantuml-1.2025.9.jar \
-  net.sourceforge.plantuml.classifier.DiagramClassifier --dir /path/to/puml/files/
+  net.sourceforge.plantuml.classifier.UmlDiagramClassifier --dir /path/to/puml/files/
 ```
 
 The `--dir` option processes all files with extensions `.puml`, `.plantuml`, `.pu`, `.wsd`, `.uml`, and `.iuml`.
@@ -110,7 +110,7 @@ One JSON object per diagram to standard output (JSON Lines format):
 
 ## Changes from Upstream PlantUML
 
-**1 new class** added: `net.sourceforge.plantuml.classifier.DiagramClassifier` — the classification tool entry point. No modifications were made to any existing PlantUML source files.
+**1 new class** added: `net.sourceforge.plantuml.classifier.UmlDiagramClassifier` — the classification tool entry point. No modifications were made to any existing PlantUML source files.
 
 ## License
 
