@@ -155,8 +155,8 @@ public class UmlDiagramClassifier {
 	private static String classifyDescription(CucaDiagram diagram, Map<String, Object> diag) {
 		boolean hasUsecase = false;
 		boolean hasActor = false;
-		boolean hasComponent = false;
-		boolean hasDeployment = false;
+		int componentCount = 0;
+		int deploymentCount = 0;
 
 		// Diagnostics: count each symbol and leaf type
 		final Map<String, Integer> symbolCounts = diag != null ? new LinkedHashMap<>() : null;
@@ -191,26 +191,31 @@ public class UmlDiagramClassifier {
 			if (isActorSymbol(sym))
 				hasActor = true;
 			else if (isComponentSymbol(sym))
-				hasComponent = true;
+				componentCount++;
 			else if (isDeploymentSymbol(sym))
-				hasDeployment = true;
+				deploymentCount++;
 		}
 
 		final String result;
 		final String rule;
 
-		if (hasUsecase || (hasActor && !hasComponent && !hasDeployment)) {
+		if (hasUsecase || (hasActor && componentCount == 0 && deploymentCount == 0)) {
 			result = "usecase";
 			rule = hasUsecase ? "has_usecase_leaf" : "actor_only";
-		} else if (hasDeployment && !hasComponent) {
+		} else if (deploymentCount > 0 && componentCount == 0) {
 			result = "deployment";
 			rule = "deployment_no_component";
-		} else if (hasComponent && !hasDeployment) {
+		} else if (componentCount > 0 && deploymentCount == 0) {
 			result = "component";
 			rule = "component_no_deployment";
-		} else if (hasComponent && hasDeployment) {
-			result = "deployment";
-			rule = "both_deployment_wins";
+		} else if (componentCount > 0 && deploymentCount > 0) {
+			if (componentCount >= deploymentCount) {
+				result = "component";
+				rule = "both_component_majority";
+			} else {
+				result = "deployment";
+				rule = "both_deployment_majority";
+			}
 		} else {
 			result = "component";
 			rule = "default_no_symbols";
@@ -223,8 +228,8 @@ public class UmlDiagramClassifier {
 			diag.put("null_symbol_count", nullSymbolCount);
 			diag.put("has_usecase", hasUsecase);
 			diag.put("has_actor", hasActor);
-			diag.put("has_component", hasComponent);
-			diag.put("has_deployment", hasDeployment);
+			diag.put("component_count", componentCount);
+			diag.put("deployment_count", deploymentCount);
 			diag.put("rule", rule);
 		}
 
