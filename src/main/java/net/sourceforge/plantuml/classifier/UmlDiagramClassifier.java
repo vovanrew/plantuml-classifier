@@ -281,17 +281,15 @@ public class UmlDiagramClassifier {
 	private static boolean isComponentSymbol(USymbol sym) {
 		return sym == USymbols.COMPONENT1
 			|| sym == USymbols.COMPONENT2
-			|| sym == USymbols.COMPONENT_RECTANGLE;
+			|| sym == USymbols.COMPONENT_RECTANGLE
+			|| sym == USymbols.INTERFACE;
 	}
 
 	private static boolean isDeploymentSymbol(USymbol sym) {
-		return sym == USymbols.NODE
-			|| sym == USymbols.CLOUD
-			|| sym == USymbols.DATABASE
-			|| sym == USymbols.ARTIFACT
+		return sym == USymbols.ARTIFACT
 			|| sym == USymbols.STORAGE
-			|| sym == USymbols.FOLDER
-			|| sym == USymbols.FRAME;
+			|| sym == USymbols.FILE
+			|| sym == USymbols.STACK;
 	}
 
 	// --- JSON output ---
