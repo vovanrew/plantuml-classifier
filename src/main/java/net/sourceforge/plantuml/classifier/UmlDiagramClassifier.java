@@ -157,6 +157,7 @@ public class UmlDiagramClassifier {
 		boolean hasActor = false;
 		int componentCount = 0;
 		int deploymentCount = 0;
+		int sharedCount = 0;
 
 		// Diagnostics: count each symbol and leaf type
 		final Map<String, Integer> symbolCounts = diag != null ? new LinkedHashMap<>() : null;
@@ -192,8 +193,12 @@ public class UmlDiagramClassifier {
 				hasActor = true;
 			else if (isComponentSymbol(sym))
 				componentCount++;
-			else if (isDeploymentSymbol(sym))
+			else if (isDeploymentExclusiveSymbol(sym))
 				deploymentCount++;
+			else if (isSharedSymbol(sym)) {
+				sharedCount++;
+				deploymentCount++;
+			}
 		}
 
 		final String result;
@@ -230,6 +235,7 @@ public class UmlDiagramClassifier {
 			diag.put("has_actor", hasActor);
 			diag.put("component_count", componentCount);
 			diag.put("deployment_count", deploymentCount);
+			diag.put("shared_count", sharedCount);
 			diag.put("rule", rule);
 		}
 
@@ -286,15 +292,21 @@ public class UmlDiagramClassifier {
 	private static boolean isComponentSymbol(USymbol sym) {
 		return sym == USymbols.COMPONENT1
 			|| sym == USymbols.COMPONENT2
-			|| sym == USymbols.COMPONENT_RECTANGLE;
+			|| sym == USymbols.COMPONENT_RECTANGLE
+			|| sym == USymbols.INTERFACE;
 	}
 
-	private static boolean isDeploymentSymbol(USymbol sym) {
+	private static boolean isDeploymentExclusiveSymbol(USymbol sym) {
+		return sym == USymbols.ARTIFACT
+			|| sym == USymbols.STORAGE
+			|| sym == USymbols.FILE
+			|| sym == USymbols.STACK;
+	}
+
+	private static boolean isSharedSymbol(USymbol sym) {
 		return sym == USymbols.NODE
 			|| sym == USymbols.CLOUD
 			|| sym == USymbols.DATABASE
-			|| sym == USymbols.ARTIFACT
-			|| sym == USymbols.STORAGE
 			|| sym == USymbols.FOLDER
 			|| sym == USymbols.FRAME;
 	}
